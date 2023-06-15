@@ -33,24 +33,24 @@ final as (
         name,
         order_id,
         fulfillable_quantity,
-        fulfillment_service,
+        fields.fulfillment_service,
         fulfillment_status,
         gift_card as is_gift_card,
-        grams,
+        fields.grams,
         pre_tax_price,
         pre_tax_price_set,
-        price,
+        product_variant.price * quantity as price,
         price_set,
-        product_id,
+        fields.product_id,
         quantity,
         requires_shipping as is_shipping_required,
-        sku,
+        fields.sku,
         taxable as is_taxable,
-        tax_code,
-        title,
+        fields.tax_code,
+        fields.title,
         total_discount,
         total_discount_set,
-        variant_id,
+        fields.variant_id,
         variant_title,
         variant_inventory_management,
         vendor,
@@ -71,12 +71,15 @@ final as (
         origin_location_name,
         origin_location_province_code,
         origin_location_zip,
-        {{ dbt_date.convert_timezone(column='cast(_fivetran_synced as ' ~ dbt.type_timestamp() ~ ')', target_tz=var('shopify_timezone', "UTC"), source_tz="UTC") }} as _fivetran_synced,
-        source_relation
+        {{ dbt_date.convert_timezone(column='cast(fields._fivetran_synced as ' ~ dbt.type_timestamp() ~ ')', target_tz=var('shopify_timezone', "UTC"), source_tz="UTC") }} as _fivetran_synced,
+        fields.source_relation
 
         {{ fivetran_utils.fill_pass_through_columns('order_line_pass_through_columns') }}
 
     from fields
+    left join {{ ref('stg_shopify__product_variant') }} as product_variant
+        on fields.product_id = product_variant.product_id
+        and fields.variant_id = product_variant.variant_id
 
 )
 
