@@ -10,6 +10,9 @@ models:
     tmp:
       +materialized: view
 vars:
+  shopify_database: FIVETRAN
+  shopify_schema: SHOPIFY 
+
   shopify_source:
     customer_source: "{{ source('shopify','customer') }}"
     order_line_refund_source: "{{ source('shopify','order_line_refund') }}"
